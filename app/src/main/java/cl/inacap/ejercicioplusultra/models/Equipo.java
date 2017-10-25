@@ -5,11 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import cl.inacap.ejercicioplusultra.helpers.DatabaseHelper;
 
-public class Equipo {
+                    // Implementar interfaz para poder enviar
+                    // objetos de Equipo a otras actividades
+public class Equipo implements Serializable {
     // Atributos
     private DatabaseHelper helper;
 
@@ -134,6 +137,43 @@ public class Equipo {
         }
     }
 
+
+    /*
+     * UPDATE (CRUD)
+     */
+    public boolean actualizar(Equipo equipo) {
+        SQLiteDatabase db = this.helper.getWritableDatabase();
+        int filasActualizadas;
+        ContentValues c = new ContentValues();
+        c.put("MODELO", equipo.getModelo());
+        c.put("MARCA", equipo.getMarca());
+        c.put("PLANTA", equipo.getPlanta()); // TYPO
+        try {
+            filasActualizadas = db.update("equipo",c,"serie = ?", new String[]{ String.valueOf(equipo.getSerie()) });
+            return (filasActualizadas > 0 ? true : false);
+        } catch (Exception e) {
+            return false;
+        } finally {
+            db.close();
+        }
+    }
+
+    /*
+     * DELETE (CRUD)
+     */
+    public boolean eliminar(int serie) {
+        SQLiteDatabase db = this.helper.getWritableDatabase();
+        int filasAfectadas;
+        try {
+            filasAfectadas = db.delete("equipo","serie = ?", new String[]{ String.valueOf(serie) });
+            return (filasAfectadas > 0 ? true : false);
+        } catch (Exception e) {
+            return false;
+        } finally {
+            db.close();
+        }
+    }
+
     /*
      * GETTERS Y SETTERS
      */
@@ -167,5 +207,10 @@ public class Equipo {
 
     public void setPlanta(String planta) {
         this.planta = planta;
+    }
+
+    @Override
+    public String toString(){
+        return (this.serie + ":" + this.modelo + " (" + this.marca + ") - Planta: " + this.planta);
     }
 }
